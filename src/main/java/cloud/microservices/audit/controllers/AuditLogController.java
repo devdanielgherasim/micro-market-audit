@@ -58,7 +58,7 @@ public class AuditLogController {
      * @return the paginated audit logs
      */
     @GET
-    @RolesAllowed({"user", "admin"})
+    @RolesAllowed("admin")
     @Operation(summary = "Get all audit logs", description = "Returns all audit logs in the system with pagination support")
     @APIResponse(responseCode = "200", description = "Paginated list of audit logs",
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
@@ -88,7 +88,7 @@ public class AuditLogController {
      */
     @GET
     @Path("/{id}")
-    @RolesAllowed({"user", "admin"})
+    @RolesAllowed("admin")
     @Operation(summary = "Get audit log by ID", description = "Returns an audit log by its ID")
     @APIResponse(responseCode = "200", description = "The audit log",
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
@@ -185,7 +185,7 @@ public class AuditLogController {
      */
     @GET
     @Path("/action/{action}")
-    @RolesAllowed({"user", "admin"})
+    @RolesAllowed("admin")
     @Operation(summary = "Find audit logs by action", description = "Returns audit logs with the specified action with pagination support")
     @APIResponse(responseCode = "200", description = "Paginated list of audit logs",
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
@@ -219,7 +219,7 @@ public class AuditLogController {
      */
     @GET
     @Path("/entity-type/{entityType}")
-    @RolesAllowed({"user", "admin"})
+    @RolesAllowed("admin")
     @Operation(summary = "Find audit logs by entity type", description = "Returns audit logs for the specified entity type with pagination support")
     @APIResponse(responseCode = "200", description = "Paginated list of audit logs",
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
@@ -253,7 +253,7 @@ public class AuditLogController {
      */
     @GET
     @Path("/entity-id/{entityId}")
-    @RolesAllowed({"user", "admin"})
+    @RolesAllowed("admin")
     @Operation(summary = "Find audit logs by entity ID", description = "Returns audit logs for the specified entity ID with pagination support")
     @APIResponse(responseCode = "200", description = "Paginated list of audit logs",
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
@@ -287,7 +287,7 @@ public class AuditLogController {
      */
     @GET
     @Path("/user/{user}")
-    @RolesAllowed({"user", "admin"})
+    @RolesAllowed("admin")
     @Operation(summary = "Find audit logs by user", description = "Returns audit logs for the specified user with pagination support")
     @APIResponse(responseCode = "200", description = "Paginated list of audit logs",
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
@@ -322,7 +322,7 @@ public class AuditLogController {
      */
     @GET
     @Path("/time-range")
-    @RolesAllowed({"user", "admin"})
+    @RolesAllowed("admin")
     @Operation(summary = "Find audit logs by time range", description = "Returns audit logs within the time range with pagination support")
     @APIResponse(responseCode = "200", description = "Paginated list of audit logs",
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
@@ -363,7 +363,7 @@ public class AuditLogController {
      */
     @GET
     @Path("/ip-address/{ipAddress}")
-    @RolesAllowed({"user", "admin"})
+    @RolesAllowed("admin")
     @Operation(summary = "Find audit logs by IP address", description = "Returns audit logs from the specified IP address with pagination support")
     @APIResponse(responseCode = "200", description = "Paginated list of audit logs",
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
@@ -397,7 +397,7 @@ public class AuditLogController {
      */
     @GET
     @Path("/status-code/{statusCode}")
-    @RolesAllowed({"user", "admin"})
+    @RolesAllowed("admin")
     @Operation(summary = "Find audit logs by status code", description = "Returns audit logs with the specified status code with pagination support")
     @APIResponse(responseCode = "200", description = "Paginated list of audit logs",
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
