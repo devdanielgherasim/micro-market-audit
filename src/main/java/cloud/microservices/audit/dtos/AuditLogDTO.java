@@ -12,7 +12,7 @@ public class AuditLogDTO {
     private String action;
     private String entityType;
     private String entityId;
-    private String user;
+    private String username;
     private String details;
     private String ipAddress;
     private String userAgent;
@@ -21,13 +21,13 @@ public class AuditLogDTO {
     public AuditLogDTO() {
     }
 
-    public AuditLogDTO(Long id, LocalDateTime timestamp, String action, String entityType, String entityId, String user, String details, String ipAddress, String userAgent, Integer statusCode) {
+    public AuditLogDTO(Long id, LocalDateTime timestamp, String action, String entityType, String entityId, String username, String details, String ipAddress, String userAgent, Integer statusCode) {
         this.id = id;
         this.timestamp = timestamp;
         this.action = action;
         this.entityType = entityType;
         this.entityId = entityId;
-        this.user = user;
+        this.username = username;
         this.details = details;
         this.ipAddress = ipAddress;
         this.userAgent = userAgent;
@@ -74,12 +74,12 @@ public class AuditLogDTO {
         this.entityId = entityId;
     }
 
-    public String getUser() {
-        return user;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUser(String user) {
-        this.user = user;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getDetails() {
@@ -120,20 +120,20 @@ public class AuditLogDTO {
         if (o == null || getClass() != o.getClass()) return false;
         AuditLogDTO that = (AuditLogDTO) o;
         return Objects.equals(id, that.id) &&
-               Objects.equals(timestamp, that.timestamp) &&
-               Objects.equals(action, that.action) &&
-               Objects.equals(entityType, that.entityType) &&
-               Objects.equals(entityId, that.entityId) &&
-               Objects.equals(user, that.user) &&
-               Objects.equals(details, that.details) &&
-               Objects.equals(ipAddress, that.ipAddress) &&
-               Objects.equals(userAgent, that.userAgent) &&
-               Objects.equals(statusCode, that.statusCode);
+                Objects.equals(timestamp, that.timestamp) &&
+                Objects.equals(action, that.action) &&
+                Objects.equals(entityType, that.entityType) &&
+                Objects.equals(entityId, that.entityId) &&
+                Objects.equals(username, that.username) &&
+                Objects.equals(details, that.details) &&
+                Objects.equals(ipAddress, that.ipAddress) &&
+                Objects.equals(userAgent, that.userAgent) &&
+                Objects.equals(statusCode, that.statusCode);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, timestamp, action, entityType, entityId, user, details, ipAddress, userAgent, statusCode);
+        return Objects.hash(id, timestamp, action, entityType, entityId, username, details, ipAddress, userAgent, statusCode);
     }
 
     @Override
@@ -144,7 +144,7 @@ public class AuditLogDTO {
                 ", action='" + action + '\'' +
                 ", entityType='" + entityType + '\'' +
                 ", entityId='" + entityId + '\'' +
-                ", user='" + user + '\'' +
+                ", user='" + username + '\'' +
                 ", details='" + details + '\'' +
                 ", ipAddress='" + ipAddress + '\'' +
                 ", userAgent='" + userAgent + '\'' +

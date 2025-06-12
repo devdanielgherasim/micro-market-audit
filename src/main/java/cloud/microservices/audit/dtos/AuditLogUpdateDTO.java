@@ -15,7 +15,7 @@ public class AuditLogUpdateDTO {
 
     private String entityId;
 
-    private String user;
+    private String username;
 
     private String details;
 
@@ -60,12 +60,12 @@ public class AuditLogUpdateDTO {
         this.entityId = entityId;
     }
 
-    public String getUser() {
-        return user;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUser(String user) {
-        this.user = user;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getDetails() {
@@ -109,7 +109,7 @@ public class AuditLogUpdateDTO {
                Objects.equals(action, that.action) &&
                Objects.equals(entityType, that.entityType) &&
                Objects.equals(entityId, that.entityId) &&
-               Objects.equals(user, that.user) &&
+               Objects.equals(username, that.username) &&
                Objects.equals(details, that.details) &&
                Objects.equals(ipAddress, that.ipAddress) &&
                Objects.equals(userAgent, that.userAgent) &&
@@ -118,7 +118,7 @@ public class AuditLogUpdateDTO {
 
     @Override
     public int hashCode() {
-        return Objects.hash(timestamp, action, entityType, entityId, user, details, ipAddress, userAgent, statusCode);
+        return Objects.hash(timestamp, action, entityType, entityId, username, details, ipAddress, userAgent, statusCode);
     }
 
     @Override
@@ -128,7 +128,7 @@ public class AuditLogUpdateDTO {
                 ", action='" + action + '\'' +
                 ", entityType='" + entityType + '\'' +
                 ", entityId='" + entityId + '\'' +
-                ", user='" + user + '\'' +
+                ", user='" + username + '\'' +
                 ", details='" + details + '\'' +
                 ", ipAddress='" + ipAddress + '\'' +
                 ", userAgent='" + userAgent + '\'' +

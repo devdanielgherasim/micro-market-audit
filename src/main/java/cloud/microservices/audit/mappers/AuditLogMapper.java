@@ -22,14 +22,14 @@ public class AuditLogMapper {
         if (auditLog == null) {
             return null;
         }
-        
+
         return new AuditLogDTO(
                 auditLog.id,
                 auditLog.getTimestamp(),
                 auditLog.getAction(),
                 auditLog.getEntityType(),
                 auditLog.getEntityId(),
-                auditLog.getUser(),
+                auditLog.getUsername(),
                 auditLog.getDetails(),
                 auditLog.getIpAddress(),
                 auditLog.getUserAgent(),
@@ -47,12 +47,12 @@ public class AuditLogMapper {
         if (dto == null || auditLog == null) {
             return;
         }
-        
+
         auditLog.setTimestamp(dto.getTimestamp());
         auditLog.setAction(dto.getAction());
         auditLog.setEntityType(dto.getEntityType());
         auditLog.setEntityId(dto.getEntityId());
-        auditLog.setUser(dto.getUser());
+        auditLog.setUsername(dto.getUsername());
         auditLog.setDetails(dto.getDetails());
         auditLog.setIpAddress(dto.getIpAddress());
         auditLog.setUserAgent(dto.getUserAgent());
@@ -69,7 +69,7 @@ public class AuditLogMapper {
         if (dto == null || auditLog == null) {
             return;
         }
-        
+
         if (dto.getTimestamp() != null) {
             auditLog.setTimestamp(dto.getTimestamp());
         }
@@ -82,8 +82,8 @@ public class AuditLogMapper {
         if (dto.getEntityId() != null) {
             auditLog.setEntityId(dto.getEntityId());
         }
-        if (dto.getUser() != null) {
-            auditLog.setUser(dto.getUser());
+        if (dto.getUsername() != null) {
+            auditLog.setUsername(dto.getUsername());
         }
         if (dto.getDetails() != null) {
             auditLog.setDetails(dto.getDetails());

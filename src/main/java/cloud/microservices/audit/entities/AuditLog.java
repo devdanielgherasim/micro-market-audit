@@ -1,7 +1,9 @@
 package cloud.microservices.audit.entities;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -31,7 +33,7 @@ public class AuditLog extends PanacheEntity {
     private String entityId;
 
     @Column(nullable = false)
-    private String user;
+    private String username;
 
     @Column(length = 4000)
     private String details;
@@ -48,12 +50,12 @@ public class AuditLog extends PanacheEntity {
     public AuditLog() {
     }
 
-    public AuditLog(LocalDateTime timestamp, String action, String entityType, String entityId, String user, String details, String ipAddress, String userAgent, Integer statusCode) {
+    public AuditLog(LocalDateTime timestamp, String action, String entityType, String entityId, String username, String details, String ipAddress, String userAgent, Integer statusCode) {
         this.timestamp = timestamp;
         this.action = action;
         this.entityType = entityType;
         this.entityId = entityId;
-        this.user = user;
+        this.username = username;
         this.details = details;
         this.ipAddress = ipAddress;
         this.userAgent = userAgent;
@@ -92,12 +94,12 @@ public class AuditLog extends PanacheEntity {
         this.entityId = entityId;
     }
 
-    public String getUser() {
-        return user;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUser(String user) {
-        this.user = user;
+    public void setUsername(String user) {
+        this.username = user;
     }
 
     public String getDetails() {
@@ -138,20 +140,20 @@ public class AuditLog extends PanacheEntity {
         if (o == null || getClass() != o.getClass()) return false;
         AuditLog auditLog = (AuditLog) o;
         return Objects.equals(id, auditLog.id) &&
-               Objects.equals(timestamp, auditLog.timestamp) &&
-               Objects.equals(action, auditLog.action) &&
-               Objects.equals(entityType, auditLog.entityType) &&
-               Objects.equals(entityId, auditLog.entityId) &&
-               Objects.equals(user, auditLog.user) &&
-               Objects.equals(details, auditLog.details) &&
-               Objects.equals(ipAddress, auditLog.ipAddress) &&
-               Objects.equals(userAgent, auditLog.userAgent) &&
-               Objects.equals(statusCode, auditLog.statusCode);
+                Objects.equals(timestamp, auditLog.timestamp) &&
+                Objects.equals(action, auditLog.action) &&
+                Objects.equals(entityType, auditLog.entityType) &&
+                Objects.equals(entityId, auditLog.entityId) &&
+                Objects.equals(username, auditLog.username) &&
+                Objects.equals(details, auditLog.details) &&
+                Objects.equals(ipAddress, auditLog.ipAddress) &&
+                Objects.equals(userAgent, auditLog.userAgent) &&
+                Objects.equals(statusCode, auditLog.statusCode);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, timestamp, action, entityType, entityId, user, details, ipAddress, userAgent, statusCode);
+        return Objects.hash(id, timestamp, action, entityType, entityId, username, details, ipAddress, userAgent, statusCode);
     }
 
     @Override
@@ -162,7 +164,7 @@ public class AuditLog extends PanacheEntity {
                 ", action='" + action + '\'' +
                 ", entityType='" + entityType + '\'' +
                 ", entityId='" + entityId + '\'' +
-                ", user='" + user + '\'' +
+                ", user='" + username + '\'' +
                 ", details='" + details + '\'' +
                 ", ipAddress='" + ipAddress + '\'' +
                 ", userAgent='" + userAgent + '\'' +

@@ -5,7 +5,6 @@ import cloud.microservices.audit.dtos.AuditLogDTO;
 import cloud.microservices.audit.dtos.AuditLogUpdateDTO;
 import cloud.microservices.audit.services.AuditLogService;
 import cloud.microservices.audit.utils.PaginationUtil;
-import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
@@ -14,7 +13,6 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.core.UriInfo;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
@@ -52,8 +50,8 @@ public class AuditLogController {
     /**
      * Gets all audit logs with pagination support.
      *
-     * @param page the page number (0-based)
-     * @param size the page size
+     * @param page    the page number (0-based)
+     * @param size    the page size
      * @param uriInfo the URI info for building pagination links
      * @return the paginated audit logs
      */
@@ -118,8 +116,8 @@ public class AuditLogController {
     @APIResponse(responseCode = "403", description = "Forbidden")
     public Response createAuditLog(@Valid AuditLogCreateDTO auditLogCreateDTO) {
         // Set the authenticated username if not provided
-        if (auditLogCreateDTO.getUser() == null || auditLogCreateDTO.getUser().isEmpty()) {
-            auditLogCreateDTO.setUser(securityIdentity.getPrincipal().getName());
+        if (auditLogCreateDTO.getUsername() == null || auditLogCreateDTO.getUsername().isEmpty()) {
+            auditLogCreateDTO.setUsername(securityIdentity.getPrincipal().getName());
         }
 
         AuditLogDTO createdAuditLog = auditLogService.createAuditLog(auditLogCreateDTO);
@@ -147,8 +145,8 @@ public class AuditLogController {
     @APIResponse(responseCode = "401", description = "Unauthorized")
     @APIResponse(responseCode = "403", description = "Forbidden")
     public Response updateAuditLog(@PathParam("id") Long id, @Valid AuditLogUpdateDTO auditLogUpdateDTO) {
-        if (auditLogUpdateDTO.getUser() != null) {
-            auditLogUpdateDTO.setUser(securityIdentity.getPrincipal().getName());
+        if (auditLogUpdateDTO.getUsername() != null) {
+            auditLogUpdateDTO.setUsername(securityIdentity.getPrincipal().getName());
         }
 
         AuditLogDTO updatedAuditLog = auditLogService.updateAuditLog(id, auditLogUpdateDTO);
@@ -177,9 +175,9 @@ public class AuditLogController {
     /**
      * Find audit logs by action with pagination support.
      *
-     * @param action the action
-     * @param page the page number (0-based)
-     * @param size the page size
+     * @param action  the action
+     * @param page    the page number (0-based)
+     * @param size    the page size
      * @param uriInfo the URI info for building pagination links
      * @return the paginated response
      */
@@ -212,9 +210,9 @@ public class AuditLogController {
      * Find audit logs by entity type with pagination support.
      *
      * @param entityType the entity type
-     * @param page the page number (0-based)
-     * @param size the page size
-     * @param uriInfo the URI info for building pagination links
+     * @param page       the page number (0-based)
+     * @param size       the page size
+     * @param uriInfo    the URI info for building pagination links
      * @return the paginated response
      */
     @GET
@@ -246,9 +244,9 @@ public class AuditLogController {
      * Find audit logs by entity ID with pagination support.
      *
      * @param entityId the entity ID
-     * @param page the page number (0-based)
-     * @param size the page size
-     * @param uriInfo the URI info for building pagination links
+     * @param page     the page number (0-based)
+     * @param size     the page size
+     * @param uriInfo  the URI info for building pagination links
      * @return the paginated response
      */
     @GET
@@ -279,9 +277,9 @@ public class AuditLogController {
     /**
      * Find audit logs by user with pagination support.
      *
-     * @param user the user
-     * @param page the page number (0-based)
-     * @param size the page size
+     * @param user    the user
+     * @param page    the page number (0-based)
+     * @param size    the page size
      * @param uriInfo the URI info for building pagination links
      * @return the paginated response
      */
@@ -315,9 +313,9 @@ public class AuditLogController {
      *
      * @param startTime the start time
      * @param endTime   the end time
-     * @param page the page number (0-based)
-     * @param size the page size
-     * @param uriInfo the URI info for building pagination links
+     * @param page      the page number (0-based)
+     * @param size      the page size
+     * @param uriInfo   the URI info for building pagination links
      * @return the paginated response
      */
     @GET
@@ -356,9 +354,9 @@ public class AuditLogController {
      * Find audit logs by IP address with pagination support.
      *
      * @param ipAddress the IP address
-     * @param page the page number (0-based)
-     * @param size the page size
-     * @param uriInfo the URI info for building pagination links
+     * @param page      the page number (0-based)
+     * @param size      the page size
+     * @param uriInfo   the URI info for building pagination links
      * @return the paginated response
      */
     @GET
@@ -390,9 +388,9 @@ public class AuditLogController {
      * Find audit logs by status code with pagination support.
      *
      * @param statusCode the status code
-     * @param page the page number (0-based)
-     * @param size the page size
-     * @param uriInfo the URI info for building pagination links
+     * @param page       the page number (0-based)
+     * @param size       the page size
+     * @param uriInfo    the URI info for building pagination links
      * @return the paginated response
      */
     @GET
