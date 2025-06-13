@@ -1,12 +1,14 @@
 package cloud.microservices.audit.dtos;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
  * Data Transfer Object for AuditLog entity.
  */
-public class AuditLogDTO {
+public class AuditLogDTO implements Serializable {
+    private static final long serialVersionUID = 1L;
     private Long id;
     private LocalDateTime timestamp;
     private String action;

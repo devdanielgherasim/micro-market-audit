@@ -3,13 +3,17 @@ package cloud.microservices.audit.dtos;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
  * Data Transfer Object for creating a new AuditLog.
  */
-public class AuditLogCreateDTO {
+public class AuditLogCreateDTO implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
     @NotNull(message = "Timestamp is required")
     private LocalDateTime timestamp;
 

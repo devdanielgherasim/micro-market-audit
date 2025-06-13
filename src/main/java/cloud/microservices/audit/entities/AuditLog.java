@@ -7,6 +7,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -15,7 +16,9 @@ import java.util.Objects;
  */
 @Entity
 @Table(name = "audit_logs")
-public class AuditLog extends PanacheEntity {
+public class AuditLog extends PanacheEntity implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @NotNull(message = "Timestamp is required")
     @Column(nullable = false)

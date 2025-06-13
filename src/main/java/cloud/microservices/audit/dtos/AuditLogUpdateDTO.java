@@ -1,12 +1,16 @@
 package cloud.microservices.audit.dtos;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
  * Data Transfer Object for updating an existing AuditLog.
  */
-public class AuditLogUpdateDTO {
+public class AuditLogUpdateDTO implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
     private LocalDateTime timestamp;
 
     private String action;
@@ -106,14 +110,14 @@ public class AuditLogUpdateDTO {
         if (o == null || getClass() != o.getClass()) return false;
         AuditLogUpdateDTO that = (AuditLogUpdateDTO) o;
         return Objects.equals(timestamp, that.timestamp) &&
-               Objects.equals(action, that.action) &&
-               Objects.equals(entityType, that.entityType) &&
-               Objects.equals(entityId, that.entityId) &&
-               Objects.equals(username, that.username) &&
-               Objects.equals(details, that.details) &&
-               Objects.equals(ipAddress, that.ipAddress) &&
-               Objects.equals(userAgent, that.userAgent) &&
-               Objects.equals(statusCode, that.statusCode);
+                Objects.equals(action, that.action) &&
+                Objects.equals(entityType, that.entityType) &&
+                Objects.equals(entityId, that.entityId) &&
+                Objects.equals(username, that.username) &&
+                Objects.equals(details, that.details) &&
+                Objects.equals(ipAddress, that.ipAddress) &&
+                Objects.equals(userAgent, that.userAgent) &&
+                Objects.equals(statusCode, that.statusCode);
     }
 
     @Override
