@@ -14,12 +14,15 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.NotFoundException;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -34,6 +37,8 @@ import java.util.List;
 @Tag(name = "Audit Log", description = "Audit log operations")
 @RolesAllowed("admin")
 public class AuditLogController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuditLogController.class);
 
     /**
      * The Audit log service.
@@ -68,14 +73,25 @@ public class AuditLogController {
             @Parameter(description = "Page size", required = false) @QueryParam("size") Integer size,
             @Context UriInfo uriInfo) {
 
-        int[] pageParams = PaginationUtil.validatePaginationParams(page, size);
-        int validPage = pageParams[0];
-        int validSize = pageParams[1];
+        logger.info("Getting all audit logs with pagination - page: {}, size: {}", page, size);
 
-        List<AuditLogDTO> auditLogs = auditLogService.getAllAuditLogsPaginated(validPage, validSize);
-        long totalCount = auditLogService.countAllAuditLogs();
+        try {
+            int[] pageParams = PaginationUtil.validatePaginationParams(page, size);
+            int validPage = pageParams[0];
+            int validSize = pageParams[1];
 
-        return PaginationUtil.createPaginatedResponse(auditLogs, totalCount, validPage, validSize, uriInfo);
+            logger.debug("Validated pagination parameters - page: {}, size: {}", validPage, validSize);
+
+            List<AuditLogDTO> auditLogs = auditLogService.getAllAuditLogsPaginated(validPage, validSize);
+            long totalCount = auditLogService.countAllAuditLogs();
+
+            logger.info("Retrieved {} audit logs out of {} total", auditLogs.size(), totalCount);
+
+            return PaginationUtil.createPaginatedResponse(auditLogs, totalCount, validPage, validSize, uriInfo);
+        } catch (Exception e) {
+            logger.error("Error retrieving all audit logs", e);
+            throw e;
+        }
     }
 
     /**
@@ -95,8 +111,25 @@ public class AuditLogController {
     @APIResponse(responseCode = "401", description = "Unauthorized")
     @APIResponse(responseCode = "403", description = "Forbidden")
     public Response getAuditLogById(@PathParam("id") Long id) {
-        AuditLogDTO auditLog = auditLogService.getAuditLogById(id);
-        return Response.ok(auditLog).build();
+        logger.info("Getting audit log by ID: {}", id);
+
+        try {
+            AuditLogDTO auditLog = auditLogService.getAuditLogById(id);
+            logger.info("Retrieved audit log: {}, action: {}, entity: {}/{}", 
+                    id, auditLog.getAction(), auditLog.getEntityType(), auditLog.getEntityId());
+
+            return Response.ok()
+                    .entity(auditLog)
+                    .header("Content-Type", MediaType.APPLICATION_JSON)
+                    .encoding("UTF-8")
+                    .build();
+        } catch (NotFoundException e) {
+            logger.warn("Audit log not found with ID: {}", id);
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error retrieving audit log with ID: {}", id, e);
+            throw e;
+        }
     }
 
     /**
@@ -115,15 +148,35 @@ public class AuditLogController {
     @APIResponse(responseCode = "401", description = "Unauthorized")
     @APIResponse(responseCode = "403", description = "Forbidden")
     public Response createAuditLog(@Valid AuditLogCreateDTO auditLogCreateDTO) {
-        // Set the authenticated username if not provided
-        if (auditLogCreateDTO.getUsername() == null || auditLogCreateDTO.getUsername().isEmpty()) {
-            auditLogCreateDTO.setUsername(securityIdentity.getPrincipal().getName());
-        }
+        logger.info("Creating new audit log: action={}, entity={}/{}", 
+                auditLogCreateDTO.getAction(), 
+                auditLogCreateDTO.getEntityType(), 
+                auditLogCreateDTO.getEntityId());
 
-        AuditLogDTO createdAuditLog = auditLogService.createAuditLog(auditLogCreateDTO);
-        return Response.created(URI.create("/api/audit/" + createdAuditLog.getId()))
-                .entity(createdAuditLog)
-                .build();
+        try {
+            // Set the authenticated username if not provided
+            if (auditLogCreateDTO.getUsername() == null || auditLogCreateDTO.getUsername().isEmpty()) {
+                String username = securityIdentity.getPrincipal().getName();
+                auditLogCreateDTO.setUsername(username);
+                logger.debug("Setting authenticated username: {}", username);
+            }
+
+            AuditLogDTO createdAuditLog = auditLogService.createAuditLog(auditLogCreateDTO);
+            logger.info("Audit log created successfully with ID: {}", createdAuditLog.getId());
+
+            return Response.created(URI.create("/api/audit/" + createdAuditLog.getId()))
+                    .entity(createdAuditLog)
+                    .header("Content-Type", MediaType.APPLICATION_JSON)
+                    .encoding("UTF-8")
+                    .build();
+        } catch (Exception e) {
+            logger.error("Error creating audit log: action={}, entity={}/{}", 
+                    auditLogCreateDTO.getAction(), 
+                    auditLogCreateDTO.getEntityType(), 
+                    auditLogCreateDTO.getEntityId(), 
+                    e);
+            throw e;
+        }
     }
 
     /**
@@ -145,12 +198,35 @@ public class AuditLogController {
     @APIResponse(responseCode = "401", description = "Unauthorized")
     @APIResponse(responseCode = "403", description = "Forbidden")
     public Response updateAuditLog(@PathParam("id") Long id, @Valid AuditLogUpdateDTO auditLogUpdateDTO) {
-        if (auditLogUpdateDTO.getUsername() != null) {
-            auditLogUpdateDTO.setUsername(securityIdentity.getPrincipal().getName());
-        }
+        logger.info("Updating audit log with ID: {}", id);
+        logger.debug("Update details: action={}, entity={}/{}", 
+                auditLogUpdateDTO.getAction(), 
+                auditLogUpdateDTO.getEntityType(), 
+                auditLogUpdateDTO.getEntityId());
 
-        AuditLogDTO updatedAuditLog = auditLogService.updateAuditLog(id, auditLogUpdateDTO);
-        return Response.ok(updatedAuditLog).build();
+        try {
+            if (auditLogUpdateDTO.getUsername() != null) {
+                String username = securityIdentity.getPrincipal().getName();
+                auditLogUpdateDTO.setUsername(username);
+                logger.debug("Setting authenticated username: {}", username);
+            }
+
+            AuditLogDTO updatedAuditLog = auditLogService.updateAuditLog(id, auditLogUpdateDTO);
+            logger.info("Audit log updated successfully: ID={}, action={}", 
+                    id, updatedAuditLog.getAction());
+
+            return Response.ok()
+                    .entity(updatedAuditLog)
+                    .header("Content-Type", MediaType.APPLICATION_JSON)
+                    .encoding("UTF-8")
+                    .build();
+        } catch (NotFoundException e) {
+            logger.warn("Audit log not found for update with ID: {}", id);
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error updating audit log with ID: {}", id, e);
+            throw e;
+        }
     }
 
     /**
@@ -168,8 +244,20 @@ public class AuditLogController {
     @APIResponse(responseCode = "401", description = "Unauthorized")
     @APIResponse(responseCode = "403", description = "Forbidden")
     public Response deleteAuditLog(@PathParam("id") Long id) {
-        auditLogService.deleteAuditLog(id);
-        return Response.noContent().build();
+        logger.info("Deleting audit log with ID: {}", id);
+
+        try {
+            auditLogService.deleteAuditLog(id);
+            logger.info("Audit log deleted successfully: ID={}", id);
+
+            return Response.noContent().build();
+        } catch (NotFoundException e) {
+            logger.warn("Audit log not found for deletion with ID: {}", id);
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error deleting audit log with ID: {}", id, e);
+            throw e;
+        }
     }
 
     /**
@@ -196,14 +284,26 @@ public class AuditLogController {
             @Parameter(description = "Page size", required = false) @QueryParam("size") Integer size,
             @Context UriInfo uriInfo) {
 
-        int[] pageParams = PaginationUtil.validatePaginationParams(page, size);
-        int validPage = pageParams[0];
-        int validSize = pageParams[1];
+        logger.info("Finding audit logs with action: {}, page: {}, size: {}", action, page, size);
 
-        List<AuditLogDTO> auditLogs = auditLogService.findByActionPaginated(action, validPage, validSize);
-        long totalCount = auditLogService.countByAction(action);
+        try {
+            int[] pageParams = PaginationUtil.validatePaginationParams(page, size);
+            int validPage = pageParams[0];
+            int validSize = pageParams[1];
 
-        return PaginationUtil.createPaginatedResponse(auditLogs, totalCount, validPage, validSize, uriInfo);
+            logger.debug("Validated pagination parameters - page: {}, size: {}", validPage, validSize);
+
+            List<AuditLogDTO> auditLogs = auditLogService.findByActionPaginated(action, validPage, validSize);
+            long totalCount = auditLogService.countByAction(action);
+
+            logger.info("Found {} audit logs with action: {} out of {} total", 
+                    auditLogs.size(), action, totalCount);
+
+            return PaginationUtil.createPaginatedResponse(auditLogs, totalCount, validPage, validSize, uriInfo);
+        } catch (Exception e) {
+            logger.error("Error finding audit logs with action: {}", action, e);
+            throw e;
+        }
     }
 
     /**
@@ -230,14 +330,26 @@ public class AuditLogController {
             @Parameter(description = "Page size", required = false) @QueryParam("size") Integer size,
             @Context UriInfo uriInfo) {
 
-        int[] pageParams = PaginationUtil.validatePaginationParams(page, size);
-        int validPage = pageParams[0];
-        int validSize = pageParams[1];
+        logger.info("Finding audit logs with entity type: {}, page: {}, size: {}", entityType, page, size);
 
-        List<AuditLogDTO> auditLogs = auditLogService.findByEntityTypePaginated(entityType, validPage, validSize);
-        long totalCount = auditLogService.countByEntityType(entityType);
+        try {
+            int[] pageParams = PaginationUtil.validatePaginationParams(page, size);
+            int validPage = pageParams[0];
+            int validSize = pageParams[1];
 
-        return PaginationUtil.createPaginatedResponse(auditLogs, totalCount, validPage, validSize, uriInfo);
+            logger.debug("Validated pagination parameters - page: {}, size: {}", validPage, validSize);
+
+            List<AuditLogDTO> auditLogs = auditLogService.findByEntityTypePaginated(entityType, validPage, validSize);
+            long totalCount = auditLogService.countByEntityType(entityType);
+
+            logger.info("Found {} audit logs with entity type: {} out of {} total", 
+                    auditLogs.size(), entityType, totalCount);
+
+            return PaginationUtil.createPaginatedResponse(auditLogs, totalCount, validPage, validSize, uriInfo);
+        } catch (Exception e) {
+            logger.error("Error finding audit logs with entity type: {}", entityType, e);
+            throw e;
+        }
     }
 
     /**
@@ -264,14 +376,26 @@ public class AuditLogController {
             @Parameter(description = "Page size", required = false) @QueryParam("size") Integer size,
             @Context UriInfo uriInfo) {
 
-        int[] pageParams = PaginationUtil.validatePaginationParams(page, size);
-        int validPage = pageParams[0];
-        int validSize = pageParams[1];
+        logger.info("Finding audit logs with entity ID: {}, page: {}, size: {}", entityId, page, size);
 
-        List<AuditLogDTO> auditLogs = auditLogService.findByEntityIdPaginated(entityId, validPage, validSize);
-        long totalCount = auditLogService.countByEntityId(entityId);
+        try {
+            int[] pageParams = PaginationUtil.validatePaginationParams(page, size);
+            int validPage = pageParams[0];
+            int validSize = pageParams[1];
 
-        return PaginationUtil.createPaginatedResponse(auditLogs, totalCount, validPage, validSize, uriInfo);
+            logger.debug("Validated pagination parameters - page: {}, size: {}", validPage, validSize);
+
+            List<AuditLogDTO> auditLogs = auditLogService.findByEntityIdPaginated(entityId, validPage, validSize);
+            long totalCount = auditLogService.countByEntityId(entityId);
+
+            logger.info("Found {} audit logs with entity ID: {} out of {} total", 
+                    auditLogs.size(), entityId, totalCount);
+
+            return PaginationUtil.createPaginatedResponse(auditLogs, totalCount, validPage, validSize, uriInfo);
+        } catch (Exception e) {
+            logger.error("Error finding audit logs with entity ID: {}", entityId, e);
+            throw e;
+        }
     }
 
     /**
@@ -298,14 +422,26 @@ public class AuditLogController {
             @Parameter(description = "Page size", required = false) @QueryParam("size") Integer size,
             @Context UriInfo uriInfo) {
 
-        int[] pageParams = PaginationUtil.validatePaginationParams(page, size);
-        int validPage = pageParams[0];
-        int validSize = pageParams[1];
+        logger.info("Finding audit logs for user: {}, page: {}, size: {}", user, page, size);
 
-        List<AuditLogDTO> auditLogs = auditLogService.findByUserPaginated(user, validPage, validSize);
-        long totalCount = auditLogService.countByUser(user);
+        try {
+            int[] pageParams = PaginationUtil.validatePaginationParams(page, size);
+            int validPage = pageParams[0];
+            int validSize = pageParams[1];
 
-        return PaginationUtil.createPaginatedResponse(auditLogs, totalCount, validPage, validSize, uriInfo);
+            logger.debug("Validated pagination parameters - page: {}, size: {}", validPage, validSize);
+
+            List<AuditLogDTO> auditLogs = auditLogService.findByUserPaginated(user, validPage, validSize);
+            long totalCount = auditLogService.countByUser(user);
+
+            logger.info("Found {} audit logs for user: {} out of {} total", 
+                    auditLogs.size(), user, totalCount);
+
+            return PaginationUtil.createPaginatedResponse(auditLogs, totalCount, validPage, validSize, uriInfo);
+        } catch (Exception e) {
+            logger.error("Error finding audit logs for user: {}", user, e);
+            throw e;
+        }
     }
 
     /**
@@ -334,20 +470,33 @@ public class AuditLogController {
             @Parameter(description = "Page size", required = false) @QueryParam("size") Integer size,
             @Context UriInfo uriInfo) {
 
+        logger.info("Finding audit logs between times: {} and {}, page: {}, size: {}", startTime, endTime, page, size);
+
         if (startTime == null || endTime == null) {
+            logger.warn("Missing required time parameters: startTime={}, endTime={}", startTime, endTime);
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Both startTime and endTime parameters are required")
                     .build();
         }
 
-        int[] pageParams = PaginationUtil.validatePaginationParams(page, size);
-        int validPage = pageParams[0];
-        int validSize = pageParams[1];
+        try {
+            int[] pageParams = PaginationUtil.validatePaginationParams(page, size);
+            int validPage = pageParams[0];
+            int validSize = pageParams[1];
 
-        List<AuditLogDTO> auditLogs = auditLogService.findByTimeRangePaginated(startTime, endTime, validPage, validSize);
-        long totalCount = auditLogService.countByTimeRange(startTime, endTime);
+            logger.debug("Validated pagination parameters - page: {}, size: {}", validPage, validSize);
 
-        return PaginationUtil.createPaginatedResponse(auditLogs, totalCount, validPage, validSize, uriInfo);
+            List<AuditLogDTO> auditLogs = auditLogService.findByTimeRangePaginated(startTime, endTime, validPage, validSize);
+            long totalCount = auditLogService.countByTimeRange(startTime, endTime);
+
+            logger.info("Found {} audit logs between {} and {} out of {} total", 
+                    auditLogs.size(), startTime, endTime, totalCount);
+
+            return PaginationUtil.createPaginatedResponse(auditLogs, totalCount, validPage, validSize, uriInfo);
+        } catch (Exception e) {
+            logger.error("Error finding audit logs between times: {} and {}", startTime, endTime, e);
+            throw e;
+        }
     }
 
     /**
@@ -374,14 +523,26 @@ public class AuditLogController {
             @Parameter(description = "Page size", required = false) @QueryParam("size") Integer size,
             @Context UriInfo uriInfo) {
 
-        int[] pageParams = PaginationUtil.validatePaginationParams(page, size);
-        int validPage = pageParams[0];
-        int validSize = pageParams[1];
+        logger.info("Finding audit logs with IP address: {}, page: {}, size: {}", ipAddress, page, size);
 
-        List<AuditLogDTO> auditLogs = auditLogService.findByIpAddressPaginated(ipAddress, validPage, validSize);
-        long totalCount = auditLogService.countByIpAddress(ipAddress);
+        try {
+            int[] pageParams = PaginationUtil.validatePaginationParams(page, size);
+            int validPage = pageParams[0];
+            int validSize = pageParams[1];
 
-        return PaginationUtil.createPaginatedResponse(auditLogs, totalCount, validPage, validSize, uriInfo);
+            logger.debug("Validated pagination parameters - page: {}, size: {}", validPage, validSize);
+
+            List<AuditLogDTO> auditLogs = auditLogService.findByIpAddressPaginated(ipAddress, validPage, validSize);
+            long totalCount = auditLogService.countByIpAddress(ipAddress);
+
+            logger.info("Found {} audit logs with IP address: {} out of {} total", 
+                    auditLogs.size(), ipAddress, totalCount);
+
+            return PaginationUtil.createPaginatedResponse(auditLogs, totalCount, validPage, validSize, uriInfo);
+        } catch (Exception e) {
+            logger.error("Error finding audit logs with IP address: {}", ipAddress, e);
+            throw e;
+        }
     }
 
     /**
@@ -408,13 +569,25 @@ public class AuditLogController {
             @Parameter(description = "Page size", required = false) @QueryParam("size") Integer size,
             @Context UriInfo uriInfo) {
 
-        int[] pageParams = PaginationUtil.validatePaginationParams(page, size);
-        int validPage = pageParams[0];
-        int validSize = pageParams[1];
+        logger.info("Finding audit logs with status code: {}, page: {}, size: {}", statusCode, page, size);
 
-        List<AuditLogDTO> auditLogs = auditLogService.findByStatusCodePaginated(statusCode, validPage, validSize);
-        long totalCount = auditLogService.countByStatusCode(statusCode);
+        try {
+            int[] pageParams = PaginationUtil.validatePaginationParams(page, size);
+            int validPage = pageParams[0];
+            int validSize = pageParams[1];
 
-        return PaginationUtil.createPaginatedResponse(auditLogs, totalCount, validPage, validSize, uriInfo);
+            logger.debug("Validated pagination parameters - page: {}, size: {}", validPage, validSize);
+
+            List<AuditLogDTO> auditLogs = auditLogService.findByStatusCodePaginated(statusCode, validPage, validSize);
+            long totalCount = auditLogService.countByStatusCode(statusCode);
+
+            logger.info("Found {} audit logs with status code: {} out of {} total", 
+                    auditLogs.size(), statusCode, totalCount);
+
+            return PaginationUtil.createPaginatedResponse(auditLogs, totalCount, validPage, validSize, uriInfo);
+        } catch (Exception e) {
+            logger.error("Error finding audit logs with status code: {}", statusCode, e);
+            throw e;
+        }
     }
 }

@@ -51,7 +51,12 @@ public class PaginationUtil {
         // Create a PageResponse object that includes both the data and pagination metadata
         PageResponse<T> pageResponse = PageResponse.of(items, totalCount, page, size);
 
-        Response.ResponseBuilder responseBuilder = Response.ok(pageResponse);
+        // Ensure proper JSON serialization by explicitly setting content type and encoding
+        // Use entity() method to ensure the object is properly serialized
+        Response.ResponseBuilder responseBuilder = Response.ok()
+                .entity(pageResponse)
+                .header("Content-Type", jakarta.ws.rs.core.MediaType.APPLICATION_JSON)
+                .encoding("UTF-8");
 
         // Add X-Total-Count header for backward compatibility
         responseBuilder.header(HEADER_X_TOTAL_COUNT, totalCount);

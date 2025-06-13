@@ -1,5 +1,11 @@
 package cloud.microservices.audit.utils;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -8,8 +14,15 @@ import java.util.List;
  *
  * @param <T> The type of items in the list
  */
-public class PageResponse<T> {
+@JsonSerialize
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
+public class PageResponse<T> implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    @JsonProperty("content")
     private List<T> content;
+
+    @JsonProperty("pagination")
     private PaginationMetadata pagination;
 
     /**
@@ -81,14 +94,39 @@ public class PageResponse<T> {
     }
 
     /**
+     * This method is used by Jackson for serialization.
+     * It ensures that the object is properly serialized to JSON.
+     *
+     * @return The content of this PageResponse
+     */
+    public List<T> getItems() {
+        return content;
+    }
+
+    /**
      * Inner class for pagination metadata.
      */
-    public static class PaginationMetadata {
+    @JsonSerialize
+    @JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
+    public static class PaginationMetadata implements Serializable {
+        private static final long serialVersionUID = 2L;
+
+        @JsonProperty("page")
         private int page;
+
+        @JsonProperty("size")
         private int size;
+
+        @JsonProperty("totalElements")
         private long totalElements;
+
+        @JsonProperty("totalPages")
         private int totalPages;
+
+        @JsonProperty("first")
         private boolean first;
+
+        @JsonProperty("last")
         private boolean last;
 
         /**
@@ -219,6 +257,23 @@ public class PageResponse<T> {
          */
         public void setLast(boolean last) {
             this.last = last;
+        }
+
+        /**
+         * This method is used by Jackson for serialization.
+         * It ensures that the object is properly serialized to JSON.
+         *
+         * @return The metadata as a map
+         */
+        public java.util.Map<String, Object> getMetadata() {
+            java.util.Map<String, Object> metadata = new java.util.HashMap<>();
+            metadata.put("page", page);
+            metadata.put("size", size);
+            metadata.put("totalElements", totalElements);
+            metadata.put("totalPages", totalPages);
+            metadata.put("first", first);
+            metadata.put("last", last);
+            return metadata;
         }
     }
 }

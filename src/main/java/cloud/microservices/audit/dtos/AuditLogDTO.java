@@ -1,5 +1,10 @@
 package cloud.microservices.audit.dtos;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -7,17 +12,39 @@ import java.util.Objects;
 /**
  * Data Transfer Object for AuditLog entity.
  */
+@JsonSerialize
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
 public class AuditLogDTO implements Serializable {
     private static final long serialVersionUID = 1L;
+
+    @JsonProperty("id")
     private Long id;
+
+    @JsonProperty("timestamp")
     private LocalDateTime timestamp;
+
+    @JsonProperty("action")
     private String action;
+
+    @JsonProperty("entityType")
     private String entityType;
+
+    @JsonProperty("entityId")
     private String entityId;
+
+    @JsonProperty("username")
     private String username;
+
+    @JsonProperty("details")
     private String details;
+
+    @JsonProperty("ipAddress")
     private String ipAddress;
+
+    @JsonProperty("userAgent")
     private String userAgent;
+
+    @JsonProperty("statusCode")
     private Integer statusCode;
 
     public AuditLogDTO() {
