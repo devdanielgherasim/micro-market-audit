@@ -14,7 +14,6 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
-import jakarta.ws.rs.NotFoundException;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -115,7 +114,7 @@ public class AuditLogController {
 
         try {
             AuditLogDTO auditLog = auditLogService.getAuditLogById(id);
-            logger.info("Retrieved audit log: {}, action: {}, entity: {}/{}", 
+            logger.info("Retrieved audit log: {}, action: {}, entity: {}/{}",
                     id, auditLog.getAction(), auditLog.getEntityType(), auditLog.getEntityId());
 
             return Response.ok()
@@ -148,13 +147,12 @@ public class AuditLogController {
     @APIResponse(responseCode = "401", description = "Unauthorized")
     @APIResponse(responseCode = "403", description = "Forbidden")
     public Response createAuditLog(@Valid AuditLogCreateDTO auditLogCreateDTO) {
-        logger.info("Creating new audit log: action={}, entity={}/{}", 
-                auditLogCreateDTO.getAction(), 
-                auditLogCreateDTO.getEntityType(), 
+        logger.info("Creating new audit log: action={}, entity={}/{}",
+                auditLogCreateDTO.getAction(),
+                auditLogCreateDTO.getEntityType(),
                 auditLogCreateDTO.getEntityId());
 
         try {
-            // Set the authenticated username if not provided
             if (auditLogCreateDTO.getUsername() == null || auditLogCreateDTO.getUsername().isEmpty()) {
                 String username = securityIdentity.getPrincipal().getName();
                 auditLogCreateDTO.setUsername(username);
@@ -170,10 +168,10 @@ public class AuditLogController {
                     .encoding("UTF-8")
                     .build();
         } catch (Exception e) {
-            logger.error("Error creating audit log: action={}, entity={}/{}", 
-                    auditLogCreateDTO.getAction(), 
-                    auditLogCreateDTO.getEntityType(), 
-                    auditLogCreateDTO.getEntityId(), 
+            logger.error("Error creating audit log: action={}, entity={}/{}",
+                    auditLogCreateDTO.getAction(),
+                    auditLogCreateDTO.getEntityType(),
+                    auditLogCreateDTO.getEntityId(),
                     e);
             throw e;
         }
@@ -199,9 +197,9 @@ public class AuditLogController {
     @APIResponse(responseCode = "403", description = "Forbidden")
     public Response updateAuditLog(@PathParam("id") Long id, @Valid AuditLogUpdateDTO auditLogUpdateDTO) {
         logger.info("Updating audit log with ID: {}", id);
-        logger.debug("Update details: action={}, entity={}/{}", 
-                auditLogUpdateDTO.getAction(), 
-                auditLogUpdateDTO.getEntityType(), 
+        logger.debug("Update details: action={}, entity={}/{}",
+                auditLogUpdateDTO.getAction(),
+                auditLogUpdateDTO.getEntityType(),
                 auditLogUpdateDTO.getEntityId());
 
         try {
@@ -212,7 +210,7 @@ public class AuditLogController {
             }
 
             AuditLogDTO updatedAuditLog = auditLogService.updateAuditLog(id, auditLogUpdateDTO);
-            logger.info("Audit log updated successfully: ID={}, action={}", 
+            logger.info("Audit log updated successfully: ID={}, action={}",
                     id, updatedAuditLog.getAction());
 
             return Response.ok()
@@ -296,7 +294,7 @@ public class AuditLogController {
             List<AuditLogDTO> auditLogs = auditLogService.findByActionPaginated(action, validPage, validSize);
             long totalCount = auditLogService.countByAction(action);
 
-            logger.info("Found {} audit logs with action: {} out of {} total", 
+            logger.info("Found {} audit logs with action: {} out of {} total",
                     auditLogs.size(), action, totalCount);
 
             return PaginationUtil.createPaginatedResponse(auditLogs, totalCount, validPage, validSize, uriInfo);
@@ -342,7 +340,7 @@ public class AuditLogController {
             List<AuditLogDTO> auditLogs = auditLogService.findByEntityTypePaginated(entityType, validPage, validSize);
             long totalCount = auditLogService.countByEntityType(entityType);
 
-            logger.info("Found {} audit logs with entity type: {} out of {} total", 
+            logger.info("Found {} audit logs with entity type: {} out of {} total",
                     auditLogs.size(), entityType, totalCount);
 
             return PaginationUtil.createPaginatedResponse(auditLogs, totalCount, validPage, validSize, uriInfo);
@@ -388,7 +386,7 @@ public class AuditLogController {
             List<AuditLogDTO> auditLogs = auditLogService.findByEntityIdPaginated(entityId, validPage, validSize);
             long totalCount = auditLogService.countByEntityId(entityId);
 
-            logger.info("Found {} audit logs with entity ID: {} out of {} total", 
+            logger.info("Found {} audit logs with entity ID: {} out of {} total",
                     auditLogs.size(), entityId, totalCount);
 
             return PaginationUtil.createPaginatedResponse(auditLogs, totalCount, validPage, validSize, uriInfo);
@@ -434,7 +432,7 @@ public class AuditLogController {
             List<AuditLogDTO> auditLogs = auditLogService.findByUserPaginated(user, validPage, validSize);
             long totalCount = auditLogService.countByUser(user);
 
-            logger.info("Found {} audit logs for user: {} out of {} total", 
+            logger.info("Found {} audit logs for user: {} out of {} total",
                     auditLogs.size(), user, totalCount);
 
             return PaginationUtil.createPaginatedResponse(auditLogs, totalCount, validPage, validSize, uriInfo);
@@ -489,7 +487,7 @@ public class AuditLogController {
             List<AuditLogDTO> auditLogs = auditLogService.findByTimeRangePaginated(startTime, endTime, validPage, validSize);
             long totalCount = auditLogService.countByTimeRange(startTime, endTime);
 
-            logger.info("Found {} audit logs between {} and {} out of {} total", 
+            logger.info("Found {} audit logs between {} and {} out of {} total",
                     auditLogs.size(), startTime, endTime, totalCount);
 
             return PaginationUtil.createPaginatedResponse(auditLogs, totalCount, validPage, validSize, uriInfo);
@@ -535,7 +533,7 @@ public class AuditLogController {
             List<AuditLogDTO> auditLogs = auditLogService.findByIpAddressPaginated(ipAddress, validPage, validSize);
             long totalCount = auditLogService.countByIpAddress(ipAddress);
 
-            logger.info("Found {} audit logs with IP address: {} out of {} total", 
+            logger.info("Found {} audit logs with IP address: {} out of {} total",
                     auditLogs.size(), ipAddress, totalCount);
 
             return PaginationUtil.createPaginatedResponse(auditLogs, totalCount, validPage, validSize, uriInfo);
@@ -581,7 +579,7 @@ public class AuditLogController {
             List<AuditLogDTO> auditLogs = auditLogService.findByStatusCodePaginated(statusCode, validPage, validSize);
             long totalCount = auditLogService.countByStatusCode(statusCode);
 
-            logger.info("Found {} audit logs with status code: {} out of {} total", 
+            logger.info("Found {} audit logs with status code: {} out of {} total",
                     auditLogs.size(), statusCode, totalCount);
 
             return PaginationUtil.createPaginatedResponse(auditLogs, totalCount, validPage, validSize, uriInfo);
