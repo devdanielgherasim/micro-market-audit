@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -17,6 +18,7 @@ import java.util.List;
 @JsonSerialize
 @JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
 public class PageResponse<T> implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @JsonProperty("content")
@@ -109,6 +111,7 @@ public class PageResponse<T> implements Serializable {
     @JsonSerialize
     @JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
     public static class PaginationMetadata implements Serializable {
+        @Serial
         private static final long serialVersionUID = 2L;
 
         @JsonProperty("page")

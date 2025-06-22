@@ -6,7 +6,6 @@ import cloud.microservices.audit.dtos.AuditLogUpdateDTO;
 import cloud.microservices.audit.services.AuditLogService;
 import cloud.microservices.audit.utils.PaginationUtil;
 import io.quarkus.security.identity.SecurityIdentity;
-import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
@@ -34,7 +33,6 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Audit Log", description = "Audit log operations")
-@RolesAllowed("admin")
 public class AuditLogController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuditLogController.class);
@@ -60,7 +58,6 @@ public class AuditLogController {
      * @return the paginated audit logs
      */
     @GET
-    @RolesAllowed("admin")
     @Operation(summary = "Get all audit logs", description = "Returns all audit logs in the system with pagination support")
     @APIResponse(responseCode = "200", description = "Paginated list of audit logs",
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
@@ -101,7 +98,6 @@ public class AuditLogController {
      */
     @GET
     @Path("/{id}")
-    @RolesAllowed("admin")
     @Operation(summary = "Get audit log by ID", description = "Returns an audit log by its ID")
     @APIResponse(responseCode = "200", description = "The audit log",
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
@@ -138,7 +134,6 @@ public class AuditLogController {
      * @return the response
      */
     @POST
-    @RolesAllowed("admin")
     @Operation(summary = "Create a new audit log", description = "Creates a new audit log in the system")
     @APIResponse(responseCode = "201", description = "Audit log created",
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
@@ -186,7 +181,6 @@ public class AuditLogController {
      */
     @PUT
     @Path("/{id}")
-    @RolesAllowed("admin")
     @Operation(summary = "Update an audit log", description = "Updates an existing audit log")
     @APIResponse(responseCode = "200", description = "Audit log updated",
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
@@ -235,7 +229,6 @@ public class AuditLogController {
      */
     @DELETE
     @Path("/{id}")
-    @RolesAllowed("admin")
     @Operation(summary = "Delete an audit log", description = "Deletes an audit log from the system")
     @APIResponse(responseCode = "204", description = "Audit log deleted")
     @APIResponse(responseCode = "404", description = "Audit log not found")
@@ -269,7 +262,6 @@ public class AuditLogController {
      */
     @GET
     @Path("/action/{action}")
-    @RolesAllowed("admin")
     @Operation(summary = "Find audit logs by action", description = "Returns audit logs with the specified action with pagination support")
     @APIResponse(responseCode = "200", description = "Paginated list of audit logs",
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
@@ -278,8 +270,8 @@ public class AuditLogController {
     @APIResponse(responseCode = "403", description = "Forbidden")
     public Response findByAction(
             @PathParam("action") String action,
-            @Parameter(description = "Page number (0-based)", required = false) @QueryParam("page") Integer page,
-            @Parameter(description = "Page size", required = false) @QueryParam("size") Integer size,
+            @Parameter(description = "Page number (0-based)") @QueryParam("page") Integer page,
+            @Parameter(description = "Page size") @QueryParam("size") Integer size,
             @Context UriInfo uriInfo) {
 
         logger.info("Finding audit logs with action: {}, page: {}, size: {}", action, page, size);
@@ -315,7 +307,6 @@ public class AuditLogController {
      */
     @GET
     @Path("/entity-type/{entityType}")
-    @RolesAllowed("admin")
     @Operation(summary = "Find audit logs by entity type", description = "Returns audit logs for the specified entity type with pagination support")
     @APIResponse(responseCode = "200", description = "Paginated list of audit logs",
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
@@ -324,8 +315,8 @@ public class AuditLogController {
     @APIResponse(responseCode = "403", description = "Forbidden")
     public Response findByEntityType(
             @PathParam("entityType") String entityType,
-            @Parameter(description = "Page number (0-based)", required = false) @QueryParam("page") Integer page,
-            @Parameter(description = "Page size", required = false) @QueryParam("size") Integer size,
+            @Parameter(description = "Page number (0-based)") @QueryParam("page") Integer page,
+            @Parameter(description = "Page size") @QueryParam("size") Integer size,
             @Context UriInfo uriInfo) {
 
         logger.info("Finding audit logs with entity type: {}, page: {}, size: {}", entityType, page, size);
@@ -361,7 +352,6 @@ public class AuditLogController {
      */
     @GET
     @Path("/entity-id/{entityId}")
-    @RolesAllowed("admin")
     @Operation(summary = "Find audit logs by entity ID", description = "Returns audit logs for the specified entity ID with pagination support")
     @APIResponse(responseCode = "200", description = "Paginated list of audit logs",
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
@@ -370,8 +360,8 @@ public class AuditLogController {
     @APIResponse(responseCode = "403", description = "Forbidden")
     public Response findByEntityId(
             @PathParam("entityId") String entityId,
-            @Parameter(description = "Page number (0-based)", required = false) @QueryParam("page") Integer page,
-            @Parameter(description = "Page size", required = false) @QueryParam("size") Integer size,
+            @Parameter(description = "Page number (0-based)") @QueryParam("page") Integer page,
+            @Parameter(description = "Page size") @QueryParam("size") Integer size,
             @Context UriInfo uriInfo) {
 
         logger.info("Finding audit logs with entity ID: {}, page: {}, size: {}", entityId, page, size);
@@ -407,7 +397,6 @@ public class AuditLogController {
      */
     @GET
     @Path("/user/{user}")
-    @RolesAllowed("admin")
     @Operation(summary = "Find audit logs by user", description = "Returns audit logs for the specified user with pagination support")
     @APIResponse(responseCode = "200", description = "Paginated list of audit logs",
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
@@ -416,8 +405,8 @@ public class AuditLogController {
     @APIResponse(responseCode = "403", description = "Forbidden")
     public Response findByUser(
             @PathParam("user") String user,
-            @Parameter(description = "Page number (0-based)", required = false) @QueryParam("page") Integer page,
-            @Parameter(description = "Page size", required = false) @QueryParam("size") Integer size,
+            @Parameter(description = "Page number (0-based)") @QueryParam("page") Integer page,
+            @Parameter(description = "Page size") @QueryParam("size") Integer size,
             @Context UriInfo uriInfo) {
 
         logger.info("Finding audit logs for user: {}, page: {}, size: {}", user, page, size);
@@ -454,7 +443,6 @@ public class AuditLogController {
      */
     @GET
     @Path("/time-range")
-    @RolesAllowed("admin")
     @Operation(summary = "Find audit logs by time range", description = "Returns audit logs within the time range with pagination support")
     @APIResponse(responseCode = "200", description = "Paginated list of audit logs",
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
@@ -464,8 +452,8 @@ public class AuditLogController {
     public Response findByTimeRange(
             @Parameter(description = "Start time (ISO format)", required = true) @QueryParam("startTime") LocalDateTime startTime,
             @Parameter(description = "End time (ISO format)", required = true) @QueryParam("endTime") LocalDateTime endTime,
-            @Parameter(description = "Page number (0-based)", required = false) @QueryParam("page") Integer page,
-            @Parameter(description = "Page size", required = false) @QueryParam("size") Integer size,
+            @Parameter(description = "Page number (0-based)") @QueryParam("page") Integer page,
+            @Parameter(description = "Page size") @QueryParam("size") Integer size,
             @Context UriInfo uriInfo) {
 
         logger.info("Finding audit logs between times: {} and {}, page: {}, size: {}", startTime, endTime, page, size);
@@ -508,7 +496,6 @@ public class AuditLogController {
      */
     @GET
     @Path("/ip-address/{ipAddress}")
-    @RolesAllowed("admin")
     @Operation(summary = "Find audit logs by IP address", description = "Returns audit logs from the specified IP address with pagination support")
     @APIResponse(responseCode = "200", description = "Paginated list of audit logs",
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
@@ -517,8 +504,8 @@ public class AuditLogController {
     @APIResponse(responseCode = "403", description = "Forbidden")
     public Response findByIpAddress(
             @PathParam("ipAddress") String ipAddress,
-            @Parameter(description = "Page number (0-based)", required = false) @QueryParam("page") Integer page,
-            @Parameter(description = "Page size", required = false) @QueryParam("size") Integer size,
+            @Parameter(description = "Page number (0-based)") @QueryParam("page") Integer page,
+            @Parameter(description = "Page size") @QueryParam("size") Integer size,
             @Context UriInfo uriInfo) {
 
         logger.info("Finding audit logs with IP address: {}, page: {}, size: {}", ipAddress, page, size);
@@ -554,7 +541,6 @@ public class AuditLogController {
      */
     @GET
     @Path("/status-code/{statusCode}")
-    @RolesAllowed("admin")
     @Operation(summary = "Find audit logs by status code", description = "Returns audit logs with the specified status code with pagination support")
     @APIResponse(responseCode = "200", description = "Paginated list of audit logs",
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
@@ -563,8 +549,8 @@ public class AuditLogController {
     @APIResponse(responseCode = "403", description = "Forbidden")
     public Response findByStatusCode(
             @PathParam("statusCode") Integer statusCode,
-            @Parameter(description = "Page number (0-based)", required = false) @QueryParam("page") Integer page,
-            @Parameter(description = "Page size", required = false) @QueryParam("size") Integer size,
+            @Parameter(description = "Page number (0-based)") @QueryParam("page") Integer page,
+            @Parameter(description = "Page size") @QueryParam("size") Integer size,
             @Context UriInfo uriInfo) {
 
         logger.info("Finding audit logs with status code: {}, page: {}, size: {}", statusCode, page, size);

@@ -11,6 +11,8 @@ import java.util.List;
  */
 public class PaginationUtil {
 
+    private PaginationUtil() {}
+
     private static final String HEADER_X_TOTAL_COUNT = "X-Total-Count";
     private static final String HEADER_LINK = "Link";
     private static final int DEFAULT_PAGE_SIZE = 20;
@@ -48,39 +50,30 @@ public class PaginationUtil {
             int size, 
             UriInfo uriInfo) {
 
-        // Create a PageResponse object that includes both the data and pagination metadata
         PageResponse<T> pageResponse = PageResponse.of(items, totalCount, page, size);
 
-        // Ensure proper JSON serialization by explicitly setting content type and encoding
-        // Use entity() method to ensure the object is properly serialized
         Response.ResponseBuilder responseBuilder = Response.ok()
                 .entity(pageResponse)
                 .header("Content-Type", jakarta.ws.rs.core.MediaType.APPLICATION_JSON)
                 .encoding("UTF-8");
 
-        // Add X-Total-Count header for backward compatibility
         responseBuilder.header(HEADER_X_TOTAL_COUNT, totalCount);
 
-        // Add Link header with prev, next, first, last links for backward compatibility
         String baseUrl = uriInfo.getRequestUriBuilder().replaceQueryParam("page", "").replaceQueryParam("size", "").build().toString();
         int lastPage = (int) Math.ceil((double) totalCount / size) - 1;
 
         StringBuilder linkHeader = new StringBuilder();
 
-        // First page link
         linkHeader.append(String.format("<%s?page=0&size=%d>; rel=\"first\"", baseUrl, size));
 
-        // Previous page link (if not on first page)
         if (page > 0) {
             linkHeader.append(String.format(", <%s?page=%d&size=%d>; rel=\"prev\"", baseUrl, page - 1, size));
         }
 
-        // Next page link (if not on last page)
         if (page < lastPage) {
             linkHeader.append(String.format(", <%s?page=%d&size=%d>; rel=\"next\"", baseUrl, page + 1, size));
         }
 
-        // Last page link
         linkHeader.append(String.format(", <%s?page=%d&size=%d>; rel=\"last\"", baseUrl, lastPage, size));
 
         responseBuilder.header(HEADER_LINK, linkHeader.toString());
