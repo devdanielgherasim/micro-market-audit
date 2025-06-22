@@ -7,7 +7,10 @@ import io.quarkus.panache.common.Page;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
 
 /**
  * Repository for AuditLog entity providing database operations.
@@ -261,5 +264,169 @@ public class AuditLogRepository implements PanacheRepository<AuditLog> {
      */
     public long countByStatusCode(Integer statusCode) {
         return count("statusCode", statusCode);
+    }
+
+    /**
+     * Find audit logs by multiple criteria with pagination.
+     *
+     * @param startDate  the start date for filtering by timestamp
+     * @param endDate    the end date for filtering by timestamp
+     * @param username   the username to filter by
+     * @param action     the action to filter by
+     * @param entityType the entity type to filter by
+     * @param entityId   the entity ID to filter by
+     * @param page       the page number (0-based)
+     * @param size       the page size
+     * @return paginated query of audit logs matching the criteria
+     */
+    public PanacheQuery<AuditLog> findByFiltersPaginated(
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            String username,
+            String action,
+            String entityType,
+            String entityId,
+            int page,
+            int size) {
+
+        StringBuilder queryBuilder = new StringBuilder();
+        List<Object> parameters = new ArrayList<>();
+        int paramIndex = 1;
+
+        // Build the query based on provided filters
+        if (startDate != null) {
+            queryBuilder.append("timestamp >= ?").append(paramIndex++);
+            parameters.add(startDate);
+        }
+
+        if (endDate != null) {
+            if (queryBuilder.length() > 0) {
+                queryBuilder.append(" AND ");
+            }
+            queryBuilder.append("timestamp <= ?").append(paramIndex++);
+            parameters.add(endDate);
+        }
+
+        if (username != null && !username.isEmpty()) {
+            if (queryBuilder.length() > 0) {
+                queryBuilder.append(" AND ");
+            }
+            queryBuilder.append("username = ?").append(paramIndex++);
+            parameters.add(username);
+        }
+
+        if (action != null && !action.isEmpty()) {
+            if (queryBuilder.length() > 0) {
+                queryBuilder.append(" AND ");
+            }
+            queryBuilder.append("action = ?").append(paramIndex++);
+            parameters.add(action);
+        }
+
+        if (entityType != null && !entityType.isEmpty()) {
+            if (queryBuilder.length() > 0) {
+                queryBuilder.append(" AND ");
+            }
+            queryBuilder.append("entityType = ?").append(paramIndex++);
+            parameters.add(entityType);
+        }
+
+        if (entityId != null && !entityId.isEmpty()) {
+            if (queryBuilder.length() > 0) {
+                queryBuilder.append(" AND ");
+            }
+            queryBuilder.append("entityId = ?").append(paramIndex++);
+            parameters.add(entityId);
+        }
+
+        // If no filters provided, return all records
+        String query = queryBuilder.length() > 0 ? queryBuilder.toString() : null;
+
+        // Execute the query with pagination
+        if (query != null) {
+            return find(query, parameters.toArray()).page(Page.of(page, size));
+        } else {
+            return findAll().page(Page.of(page, size));
+        }
+    }
+
+    /**
+     * Count audit logs by multiple criteria.
+     *
+     * @param startDate  the start date for filtering by timestamp
+     * @param endDate    the end date for filtering by timestamp
+     * @param username   the username to filter by
+     * @param action     the action to filter by
+     * @param entityType the entity type to filter by
+     * @param entityId   the entity ID to filter by
+     * @return count of audit logs matching the criteria
+     */
+    public long countByFilters(
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            String username,
+            String action,
+            String entityType,
+            String entityId) {
+
+        StringBuilder queryBuilder = new StringBuilder();
+        List<Object> parameters = new ArrayList<>();
+        int paramIndex = 1;
+
+        // Build the query based on provided filters
+        if (startDate != null) {
+            queryBuilder.append("timestamp >= ?").append(paramIndex++);
+            parameters.add(startDate);
+        }
+
+        if (endDate != null) {
+            if (queryBuilder.length() > 0) {
+                queryBuilder.append(" AND ");
+            }
+            queryBuilder.append("timestamp <= ?").append(paramIndex++);
+            parameters.add(endDate);
+        }
+
+        if (username != null && !username.isEmpty()) {
+            if (queryBuilder.length() > 0) {
+                queryBuilder.append(" AND ");
+            }
+            queryBuilder.append("username = ?").append(paramIndex++);
+            parameters.add(username);
+        }
+
+        if (action != null && !action.isEmpty()) {
+            if (queryBuilder.length() > 0) {
+                queryBuilder.append(" AND ");
+            }
+            queryBuilder.append("action = ?").append(paramIndex++);
+            parameters.add(action);
+        }
+
+        if (entityType != null && !entityType.isEmpty()) {
+            if (queryBuilder.length() > 0) {
+                queryBuilder.append(" AND ");
+            }
+            queryBuilder.append("entityType = ?").append(paramIndex++);
+            parameters.add(entityType);
+        }
+
+        if (entityId != null && !entityId.isEmpty()) {
+            if (queryBuilder.length() > 0) {
+                queryBuilder.append(" AND ");
+            }
+            queryBuilder.append("entityId = ?").append(paramIndex++);
+            parameters.add(entityId);
+        }
+
+        // If no filters provided, count all records
+        String query = queryBuilder.length() > 0 ? queryBuilder.toString() : null;
+
+        // Execute the count query
+        if (query != null) {
+            return count(query, parameters.toArray());
+        } else {
+            return count();
+        }
     }
 }

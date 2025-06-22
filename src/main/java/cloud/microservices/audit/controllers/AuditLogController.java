@@ -50,42 +50,73 @@ public class AuditLogController {
     SecurityIdentity securityIdentity;
 
     /**
-     * Gets all audit logs with pagination support.
+     * Gets all audit logs with pagination and filtering support.
      *
-     * @param page    the page number (0-based)
-     * @param size    the page size
-     * @param uriInfo the URI info for building pagination links
-     * @return the paginated audit logs
+     * @param page       the page number (0-based)
+     * @param size       the page size
+     * @param startDate  the start date for filtering by timestamp (ISO format)
+     * @param endDate    the end date for filtering by timestamp (ISO format)
+     * @param username   the username to filter by
+     * @param action     the action to filter by
+     * @param entityType the entity type to filter by
+     * @param entityId   the entity ID to filter by
+     * @param uriInfo    the URI info for building pagination links
+     * @return the paginated and filtered audit logs
      */
     @GET
-    @Operation(summary = "Get all audit logs", description = "Returns all audit logs in the system with pagination support")
+    @Operation(summary = "Get all audit logs", description = "Returns all audit logs in the system with pagination and filtering support")
     @APIResponse(responseCode = "200", description = "Paginated list of audit logs",
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
                     schema = @Schema(implementation = AuditLogDTO.class)))
     @APIResponse(responseCode = "401", description = "Unauthorized")
     @APIResponse(responseCode = "403", description = "Forbidden")
     public Response getAllAuditLogs(
-            @Parameter(description = "Page number (0-based)", required = false) @QueryParam("page") Integer page,
-            @Parameter(description = "Page size", required = false) @QueryParam("size") Integer size,
+            @Parameter(description = "Page number (0-based)") @QueryParam("page") Integer page,
+            @Parameter(description = "Page size") @QueryParam("size") Integer size,
+            @Parameter(description = "Start date (ISO format)") @QueryParam("startDate") String startDate,
+            @Parameter(description = "End date (ISO format)") @QueryParam("endDate") String endDate,
+            @Parameter(description = "Username") @QueryParam("username") String username,
+            @Parameter(description = "Action") @QueryParam("action") String action,
+            @Parameter(description = "Entity type") @QueryParam("entityType") String entityType,
+            @Parameter(description = "Entity ID") @QueryParam("entityId") String entityId,
             @Context UriInfo uriInfo) {
 
-        logger.info("Getting all audit logs with pagination - page: {}, size: {}", page, size);
+        logger.info("Getting filtered audit logs with pagination - page: {}, size: {}", page, size);
+        logger.debug("Filters - startDate: {}, endDate: {}, username: {}, action: {}, entityType: {}, entityId: {}",
+                startDate, endDate, username, action, entityType, entityId);
 
         try {
             int[] pageParams = PaginationUtil.validatePaginationParams(page, size);
             int validPage = pageParams[0];
             int validSize = pageParams[1];
 
-            logger.debug("Validated pagination parameters - page: {}, size: {}", validPage, validSize);
+            // Check if any filters are provided
+            boolean hasFilters = startDate != null || endDate != null || 
+                                 username != null || action != null || 
+                                 entityType != null || entityId != null;
 
-            List<AuditLogDTO> auditLogs = auditLogService.getAllAuditLogsPaginated(validPage, validSize);
-            long totalCount = auditLogService.countAllAuditLogs();
+            List<AuditLogDTO> auditLogs;
+            long totalCount;
 
-            logger.info("Retrieved {} audit logs out of {} total", auditLogs.size(), totalCount);
+            if (hasFilters) {
+                // Use filtered query
+                auditLogs = auditLogService.findByFiltersPaginated(
+                        startDate, endDate, username, action, entityType, entityId, validPage, validSize);
+                totalCount = auditLogService.countByFilters(
+                        startDate, endDate, username, action, entityType, entityId);
+
+                logger.info("Retrieved {} filtered audit logs out of {} total", auditLogs.size(), totalCount);
+            } else {
+                // Use unfiltered query
+                auditLogs = auditLogService.getAllAuditLogsPaginated(validPage, validSize);
+                totalCount = auditLogService.countAllAuditLogs();
+
+                logger.info("Retrieved {} audit logs out of {} total", auditLogs.size(), totalCount);
+            }
 
             return PaginationUtil.createPaginatedResponse(auditLogs, totalCount, validPage, validSize, uriInfo);
         } catch (Exception e) {
-            logger.error("Error retrieving all audit logs", e);
+            logger.error("Error retrieving audit logs", e);
             throw e;
         }
     }

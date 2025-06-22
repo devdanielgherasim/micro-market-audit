@@ -13,6 +13,8 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -377,5 +379,107 @@ public class AuditLogService {
      */
     public long countByStatusCode(Integer statusCode) {
         return auditLogRepository.countByStatusCode(statusCode);
+    }
+
+    /**
+     * Find audit logs by multiple filter criteria with pagination.
+     *
+     * @param startDate  the start date string for filtering by timestamp (ISO format)
+     * @param endDate    the end date string for filtering by timestamp (ISO format)
+     * @param username   the username to filter by
+     * @param action     the action to filter by
+     * @param entityType the entity type to filter by
+     * @param entityId   the entity ID to filter by
+     * @param page       the page number (0-based)
+     * @param size       the page size
+     * @return list of audit logs matching the criteria
+     */
+    public List<AuditLogDTO> findByFiltersPaginated(
+            String startDate,
+            String endDate,
+            String username,
+            String action,
+            String entityType,
+            String entityId,
+            int page,
+            int size) {
+
+        LocalDateTime startDateTime = parseDateTime(startDate, true);
+        LocalDateTime endDateTime = parseDateTime(endDate, false);
+
+        return auditLogRepository.findByFiltersPaginated(
+                startDateTime,
+                endDateTime,
+                username,
+                action,
+                entityType,
+                entityId,
+                page,
+                size
+        ).list().stream()
+          .map(auditLog -> auditLogMapper.toDTO(auditLog))
+          .collect(Collectors.toList());
+    }
+
+    /**
+     * Count audit logs by multiple filter criteria.
+     *
+     * @param startDate  the start date string for filtering by timestamp (ISO format)
+     * @param endDate    the end date string for filtering by timestamp (ISO format)
+     * @param username   the username to filter by
+     * @param action     the action to filter by
+     * @param entityType the entity type to filter by
+     * @param entityId   the entity ID to filter by
+     * @return count of audit logs matching the criteria
+     */
+    public long countByFilters(
+            String startDate,
+            String endDate,
+            String username,
+            String action,
+            String entityType,
+            String entityId) {
+
+        LocalDateTime startDateTime = parseDateTime(startDate, true);
+        LocalDateTime endDateTime = parseDateTime(endDate, false);
+
+        return auditLogRepository.countByFilters(
+                startDateTime,
+                endDateTime,
+                username,
+                action,
+                entityType,
+                entityId
+        );
+    }
+
+    /**
+     * Parse a date string to LocalDateTime.
+     * 
+     * @param dateString the date string to parse
+     * @param isStartDate whether this is a start date (true) or end date (false)
+     * @return the parsed LocalDateTime or null if the input is null or empty
+     */
+    private LocalDateTime parseDateTime(String dateString, boolean isStartDate) {
+        if (dateString == null || dateString.isEmpty()) {
+            return null;
+        }
+
+        try {
+            // Try to parse as ISO date-time format
+            if (dateString.contains("T")) {
+                return LocalDateTime.parse(dateString);
+            }
+
+            // Try to parse as ISO date format and set time to start or end of day
+            if (isStartDate) {
+                return LocalDateTime.parse(dateString + "T00:00:00");
+            } else {
+                return LocalDateTime.parse(dateString + "T23:59:59.999999999");
+            }
+        } catch (DateTimeParseException e) {
+            // If parsing fails, return null
+            return null;
+        }
     }
 }
