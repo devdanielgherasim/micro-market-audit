@@ -91,7 +91,7 @@ Testcontainers requires a working Docker daemon on the machine running the tests
 
 Jobs defined directly in this repo:
 
-- **`test`** (stage `test`): runs `./mvnw test` inside the shared `java21-docker-azcli` CI image (with `docker:dind` service), publishes JUnit XML from `target/surefire-reports/`.
+- **`test`** (stage `test`): runs `./mvnw test` inside the shared `${CI_TOOLS_IMAGE}` (cloud-specific `ci-base-aws/azure/gcp`, with `docker:dind` service), publishes JUnit XML from `target/surefire-reports/`.
 - **`build-and-push-native`** (stage `build`): runs `./build.sh` to produce and push the native image, then references the shared `.export-image-ref` script to export `IMAGE_REF`/`IMAGE_DIGEST` into `build.env` (dotenv artifact) so downstream stages can pick up the built image reference.
 
 The `scan`, `sign`, and `promote` stages themselves (SAST, dependency and secret scanning gated on HIGH/CRITICAL, Trivy image scan, Syft SBOM generation, cosign keyless sign+verify, and a trigger into the separate `deployment` repo's promotion pipeline) are defined in the shared `utilities` template, not in this file — this repo only supplies the pipeline `include`, stage list, and the two jobs above.
