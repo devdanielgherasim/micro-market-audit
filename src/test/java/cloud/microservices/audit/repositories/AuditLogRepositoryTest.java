@@ -1,11 +1,11 @@
 package cloud.microservices.audit.repositories;
 
-import cloud.microservices.audit.PostgresTestResource;
 import cloud.microservices.audit.entities.AuditLog;
 import io.quarkus.test.TestTransaction;
-import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -13,11 +13,16 @@ import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
-@QuarkusTestResource(PostgresTestResource.class)
 class AuditLogRepositoryTest {
 
     @Inject
     AuditLogRepository auditLogRepository;
+
+    @BeforeEach
+    @Transactional
+    void cleanDatabase() {
+        auditLogRepository.deleteAll();
+    }
 
     @Test
     @TestTransaction

@@ -142,7 +142,7 @@ public class AuditLogRepository implements PanacheRepository<AuditLog> {
      * @return list of audit logs for the specified user
      */
     public List<AuditLog> findByUser(String user) {
-        return list("user", user);
+        return list("username", user);
     }
 
     /**
@@ -154,7 +154,7 @@ public class AuditLogRepository implements PanacheRepository<AuditLog> {
      * @return paginated query of audit logs for the specified user
      */
     public PanacheQuery<AuditLog> findByUserPaginated(String user, int page, int size) {
-        return find("user", user).page(Page.of(page, size));
+        return find("username", user).page(Page.of(page, size));
     }
 
     /**
@@ -164,7 +164,7 @@ public class AuditLogRepository implements PanacheRepository<AuditLog> {
      * @return count of audit logs for the specified user
      */
     public long countByUser(String user) {
-        return count("user", user);
+        return count("username", user);
     }
 
     /**

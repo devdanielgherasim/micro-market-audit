@@ -1,10 +1,12 @@
 package cloud.microservices.audit.controllers;
 
-import cloud.microservices.audit.PostgresTestResource;
-import io.quarkus.test.common.QuarkusTestResource;
+import cloud.microservices.audit.repositories.AuditLogRepository;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import io.restassured.http.ContentType;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
@@ -12,8 +14,16 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
 @QuarkusTest
-@QuarkusTestResource(PostgresTestResource.class)
 class AuditLogControllerTest {
+
+    @Inject
+    AuditLogRepository auditLogRepository;
+
+    @BeforeEach
+    @Transactional
+    void cleanDatabase() {
+        auditLogRepository.deleteAll();
+    }
 
     @Test
     void createsAndListsPublicAuditLog() {
