@@ -79,24 +79,11 @@ jobs:
           java-version: "21"
           cache: maven
 
-      - id: resolve-before-build
-        name: Resolve registry name
-        uses: devdanielgherasim/micro-market-utilities/.github/actions/resolve-image-ref@main
-        with:
-          cloud-provider: ${{ env.CLOUD_PROVIDER }}
-          environment: ${{ env.ENVIRONMENT }}
-          project-namespace: ${{ env.PROJECT_NAMESPACE }}
-          aws-account-id: ${{ secrets.AWS_ACCOUNT_ID }}
-          aws-region: ${{ env.AWS_REGION }}
-          gcp-project-id: ${{ secrets.GCP_PROJECT_ID }}
-          gcp-region: ${{ env.GCP_REGION }}
-          image-name: ${{ env.APP_NAME }}
-
-      - name: Cloud registry login
+      - id: registry-login
+        name: Cloud registry login
         uses: devdanielgherasim/micro-market-utilities/.github/actions/cloud-registry-login@main
         with:
           cloud-provider: ${{ env.CLOUD_PROVIDER }}
-          container-registry-name: ${{ steps.resolve-before-build.outputs.container-registry-name }}
           aws-role-arn: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
           azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -109,7 +96,7 @@ jobs:
       - name: Build and push native image
         env:
           MAIN_SCRIPT_LOGIN: "true"
-          CONTAINER_REGISTRY_NAME: ${{ steps.resolve-before-build.outputs.container-registry-name }}
+          CONTAINER_REGISTRY_NAME: ${{ steps.registry-login.outputs.container-registry-name }}
           CI_COMMIT_SHA: ${{ github.sha }}
           CI_PROJECT_NAME: ${{ env.APP_NAME }}
         run: |
@@ -128,7 +115,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           gcp-project-id: ${{ secrets.GCP_PROJECT_ID }}
           gcp-region: ${{ env.GCP_REGION }}
-          container-registry-name: ${{ steps.resolve-before-build.outputs.container-registry-name }}
+          container-registry-name: ${{ steps.registry-login.outputs.container-registry-name }}
           image-name: ${{ env.APP_NAME }}
 
       - name: Upload native runner
