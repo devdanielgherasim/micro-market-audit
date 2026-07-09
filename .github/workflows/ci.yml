@@ -145,10 +145,9 @@ jobs:
       image-digest: ${{ needs.build-and-push-native.outputs.image-digest }}
       aws-region: eu-central-1
       gcp-region: europe-west3
-      cosign-workflow-file: ci.yml
       deployment-repo: devdanielgherasim/micro-market-deployment
       promoted-app: audit
-      trigger-promotion: false
+      trigger-promotion: true
       trivy-ignore-cves: |
         # CVE-2026-54369: HIGH, libacl 2.2.53-3.el8, symlink-traversal privilege
         # escalation. Lives in the quay.io/quarkus/quarkus-micro-image:2.0 base
